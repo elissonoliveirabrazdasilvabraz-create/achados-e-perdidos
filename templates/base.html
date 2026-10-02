@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Achados e Perdidos{% endblock %}</title>
+
+    <meta
+        name="description"
+        content="Mural de achados e perdidos"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+    <header class="site-header">
+        <div class="container header-content">
+
+            <a href="{{ url_for('index') }}" class="logo">
+                Achados & Perdidos
+            </a>
+
+            <nav class="main-nav">
+                <a href="{{ url_for('index') }}">
+                    Início
+                </a>
+
+                <a href="{{ url_for('new_item') }}">
+    Cadastrar item
+</a>
+
+            </nav>
+
+        </div>
+    </header>
+
+    <main class="container">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>
+                &copy; 2026 - Achados & Perdidos
+            </p>
+        </div>
+    </footer>
+
+    {% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}
+
+
+</body>
+</html>

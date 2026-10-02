@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% if editing %}
+    {% set page_title = "Editar item" %}
+{% else %}
+    {% set page_title = "Cadastrar item" %}
+{% endif %}
+
+{% block title %}
+    {{ page_title }} - Achados & Perdidos
+{% endblock %}
+
+
+{% block content %}
+
+<section class="form-section">
+
+    <div class="form-header">
+
+        <a
+            href="{{ url_for('index') }}"
+            class="back-link"
+        >
+            ← Voltar para o mural
+        </a>
+
+        <h1>
+            {{ page_title }}
+        </h1>
+
+        {% if editing %}
+
+            <p>
+                Atualize as informações do item.
+            </p>
+
+        {% else %}
+
+            <p>
+                Informe os detalhes do objeto perdido ou encontrado.
+                Quanto mais informações, maior a chance de ele ser localizado.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         FORMULÁRIO
+         ===================================================== -->
+
+    <form
+        action="{% if editing %}
+                    {{ url_for('edit_item', item_id=item.id) }}
+                {% else %}
+                    {{ url_for('create_item') }}
+                {% endif %}"
+        method="POST"
+        enctype="multipart/form-data"
+        class="item-form"
+    >
+
+
+        <!-- =================================================
+             TIPO
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label for="item_type">
+                Tipo do registro
+            </label>
+
+            <select
+                id="item_type"
+                name="item_type"
+                required
+            >
+
+                <option value="">
+                    Selecione uma opção
+                </option>
+
+                <option
+                    value="perdido"
+                    {% if item and item.item_type == "perdido" %}
+                        selected
+                    {% endif %}
+                >
+                    Item perdido
+                </option>
+
+                <option
+                    value="encontrado"
+                    {% if item and item.item_type == "encontrado" %}
+                        selected
+                    {% endif %}
+                >
+                    Item encontrado
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- =================================================
+             NOME
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label for="title">
+                Nome do item
+            </label>
+
+            <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Ex.: Carteira preta"
+                maxlength="120"
+                value="{{ item.title if item else '' }}"
+                required
+            >
+
+        </div>
+
+
+        <!-- =================================================
+             DESCRIÇÃO
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label for="description">
+                Descrição
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                rows="5"
+                maxlength="1000"
+                placeholder="Descreva o item, características, marca, cor, detalhes etc."
+                required
+            >{{ item.description if item else '' }}</textarea>
+
+        </div>
+
+
+        <!-- =================================================
+             LOCAL E DATA
+             ================================================= -->
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label for="location">
+                    Local
+                </label>
+
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    placeholder="Ex.: Praça do bairro"
+                    maxlength="200"
+                    value="{{ item.location if item else '' }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="date">
+                    Data
+                </label>
+
+                <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value="{% if item %}{{ item.date.strftime('%Y-%m-%d') }}{% endif %}"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CONTATO
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label for="contact_name">
+                Nome para contato
+            </label>
+
+            <input
+                type="text"
+                id="contact_name"
+                name="contact_name"
+                placeholder="Seu nome"
+                maxlength="120"
+                value="{{ item.contact_name if item else '' }}"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="contact">
+                Telefone ou outro contato
+            </label>
+
+            <input
+                type="text"
+                id="contact"
+                name="contact"
+                placeholder="Ex.: (81) 99999-9999"
+                maxlength="120"
+                value="{{ item.contact if item else '' }}"
+                required
+            >
+
+        </div>
+
+
+        <!-- =================================================
+             IMAGEM
+             ================================================= -->
+
+        <div class="form-group">
+
+            <label for="image">
+                Foto do item
+            </label>
+
+            <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/png,image/jpeg,image/webp"
+            >
+
+
+            {% if editing and item.image_filename %}
+
+                <div class="current-image">
+
+                    <p>
+                        Foto atual:
+                    </p>
+
+                    <img
+                        src="{{ url_for(
+                            'static',
+                            filename='uploads/' + item.image_filename
+                        ) }}"
+                        alt="{{ item.title }}"
+                    >
+
+                </div>
+
+            {% endif %}
+
+
+            <small>
+                Formatos aceitos: JPG, PNG e WEBP.
+                Tamanho máximo: 5 MB.
+            </small>
+
+        </div>
+
+
+        <!-- =================================================
+             AÇÕES
+             ================================================= -->
+
+        <div class="form-actions">
+
+            {% if editing %}
+
+                <a
+                    href="{{ url_for(
+                        'item_detail',
+                        item_id=item.id
+                    ) }}"
+                    class="btn btn-secondary"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Salvar alterações
+                </button>
+
+            {% else %}
+
+                <a
+                    href="{{ url_for('index') }}"
+                    class="btn btn-secondary"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Publicar item
+                </button>
+
+            {% endif %}
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}

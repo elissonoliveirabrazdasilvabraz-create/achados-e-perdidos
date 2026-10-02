@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}Início - Achados & Perdidos{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>Mural de Achados & Perdidos</h1>
+
+        <p>
+            Encontre objetos perdidos ou ajude alguém a recuperar
+            aquilo que foi encontrado.
+        </p>
+
+        <a
+            href="{{ url_for('new_item') }}"
+            class="btn btn-primary"
+        >
+            Cadastrar um item
+        </a>
+
+    </div>
+
+</section>
+
+
+<section class="items-section">
+
+    <div class="section-header">
+
+        <h2>Itens publicados</h2>
+
+        <p>
+            Pesquise e encontre objetos perdidos ou encontrados.
+        </p>
+
+    </div>
+
+
+    <!-- =====================================================
+         BUSCA E FILTROS
+         ===================================================== -->
+
+    <form
+        method="GET"
+        action="{{ url_for('index') }}"
+        class="search-form"
+    >
+
+        <div class="search-field">
+
+            <label for="search">
+                Pesquisar
+            </label>
+
+            <input
+                type="search"
+                id="search"
+                name="search"
+                value="{{ search }}"
+                placeholder="Ex.: carteira, celular, mochila..."
+            >
+
+        </div>
+
+
+        <div class="search-field">
+
+            <label for="item_type">
+                Tipo
+            </label>
+
+            <select
+                id="item_type"
+                name="item_type"
+            >
+
+                <option value="">
+                    Todos
+                </option>
+
+                <option
+                    value="perdido"
+                    {% if item_type == "perdido" %}
+                        selected
+                    {% endif %}
+                >
+                    Perdidos
+                </option>
+
+                <option
+                    value="encontrado"
+                    {% if item_type == "encontrado" %}
+                        selected
+                    {% endif %}
+                >
+                    Encontrados
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="search-field">
+
+            <label for="status">
+                Status
+            </label>
+
+            <select
+                id="status"
+                name="status"
+            >
+
+                <option value="">
+                    Todos
+                </option>
+
+                <option
+                    value="aberto"
+                    {% if status == "aberto" %}
+                        selected
+                    {% endif %}
+                >
+                    Em aberto
+                </option>
+
+                <option
+                    value="devolvido"
+                    {% if status == "devolvido" %}
+                        selected
+                    {% endif %}
+                >
+                    Devolvidos
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="search-actions">
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Pesquisar
+            </button>
+
+            <a
+                href="{{ url_for('index') }}"
+                class="btn btn-secondary"
+            >
+                Limpar
+            </a>
+
+        </div>
+
+    </form>
+
+
+    <!-- =====================================================
+         RESULTADOS
+         ===================================================== -->
+
+    {% if items %}
+
+        <div class="results-info">
+
+            <strong>
+                {{ items|length }}
+                {% if items|length == 1 %}
+                    item encontrado
+                {% else %}
+                    itens encontrados
+                {% endif %}
+            </strong>
+
+            {% if search or item_type or status %}
+
+                <span>
+                    com os filtros selecionados
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="items-grid">
+
+            {% for item in items %}
+
+                <article class="item-card">
+
+                    {% if item.image_filename %}
+
+                        <div class="item-image">
+
+                            <img
+                                src="{{ url_for(
+                                    'static',
+                                    filename='uploads/' + item.image_filename
+                                ) }}"
+                                alt="{{ item.title }}"
+                            >
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="item-image item-image-placeholder">
+
+                            <span>
+                                Sem imagem
+                            </span>
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="item-card-content">
+
+                        {% if item.item_type == "perdido" %}
+
+                            <span class="item-type lost">
+                                Perdido
+                            </span>
+
+                        {% else %}
+
+                            <span class="item-type found">
+                                Encontrado
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if item.status == "devolvido" %}
+
+                            <span class="status-closed">
+                                Devolvido
+                            </span>
+
+                        {% endif %}
+
+
+                        <h3>
+                            {{ item.title }}
+                        </h3>
+
+
+                        {% if item.description %}
+
+                            <p class="item-description">
+                                {{ item.description }}
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if item.location %}
+
+                            <p class="item-info">
+                                <strong>Local:</strong>
+                                {{ item.location }}
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if item.date %}
+
+                            <p class="item-info">
+                                <strong>Data:</strong>
+                                {{ item.date.strftime('%d/%m/%Y') }}
+                            </p>
+
+                        {% endif %}
+
+
+                        <a
+                            href="{{ url_for(
+                                'item_detail',
+                                item_id=item.id
+                            ) }}"
+                            class="btn btn-secondary"
+                        >
+                            Ver detalhes
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                🔎
+            </div>
+
+            <h3>
+                Nenhum item encontrado
+            </h3>
+
+            <p>
+                Não encontramos itens com os filtros selecionados.
+                Tente modificar sua pesquisa.
+            </p>
+
+            <a
+                href="{{ url_for('index') }}"
+                class="btn btn-secondary"
+            >
+                Limpar filtros
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

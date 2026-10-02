@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ item.title }} - Achados & Perdidos
+{% endblock %}
+
+
+{% block content %}
+
+<section class="detail-section">
+
+    <!-- =====================================================
+         VOLTAR
+         ===================================================== -->
+
+    <a
+        href="{{ url_for('index') }}"
+        class="back-link"
+    >
+        ← Voltar para o mural
+    </a>
+
+
+    <!-- =====================================================
+         DETALHES DO ITEM
+         ===================================================== -->
+
+    <div class="detail-card">
+
+        <!-- =================================================
+             IMAGEM
+             ================================================= -->
+
+        {% if item.image_filename %}
+
+            <div class="detail-image">
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename='uploads/' + item.image_filename
+                    ) }}"
+                    alt="{{ item.title }}"
+                >
+
+            </div>
+
+        {% else %}
+
+            <div class="detail-image detail-image-placeholder">
+
+                <span>
+                    Sem imagem
+                </span>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- =================================================
+             INFORMAÇÕES
+             ================================================= -->
+
+        <div class="detail-content">
+
+            <!-- Tipo -->
+
+            {% if item.item_type == "perdido" %}
+
+                <span class="item-type lost">
+                    Item perdido
+                </span>
+
+            {% else %}
+
+                <span class="item-type found">
+                    Item encontrado
+                </span>
+
+            {% endif %}
+
+
+            <!-- Status -->
+
+            {% if item.status == "devolvido" %}
+
+                <span class="status-closed">
+                    ✓ Devolvido
+                </span>
+
+            {% else %}
+
+                <span class="item-type found">
+                    Em aberto
+                </span>
+
+            {% endif %}
+
+
+            <!-- Título -->
+
+            <h1>
+                {{ item.title }}
+            </h1>
+
+
+            <!-- Descrição -->
+
+            <div class="detail-description">
+
+                {{ item.description }}
+
+            </div>
+
+
+            <!-- =================================================
+                 DADOS
+                 ================================================= -->
+
+            <div class="detail-info">
+
+                <div class="detail-info-item">
+
+                    <strong>
+                        Local
+                    </strong>
+
+                    {{ item.location }}
+
+                </div>
+
+
+                <div class="detail-info-item">
+
+                    <strong>
+                        Data
+                    </strong>
+
+                    {{ item.date.strftime('%d/%m/%Y') }}
+
+                </div>
+
+
+                <div class="detail-info-item">
+
+                    <strong>
+                        Publicado em
+                    </strong>
+
+                    {{ item.created_at.strftime('%d/%m/%Y às %H:%M') }}
+
+                </div>
+
+
+                <div class="detail-info-item">
+
+                    <strong>
+                        Responsável pelo anúncio
+                    </strong>
+
+                    {{ item.contact_name }}
+
+                </div>
+
+
+                <div class="detail-info-item">
+
+                    <strong>
+                        Contato
+                    </strong>
+
+                    {{ item.contact }}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CONTATO
+                 ================================================= -->
+
+            {% if item.status != "devolvido" %}
+
+                <div class="contact-box">
+
+                    <h2>
+                        Encontrou este item?
+                    </h2>
+
+                    <p>
+                        Entre em contato com a pessoa responsável
+                        pelo anúncio utilizando os dados acima.
+                    </p>
+
+                </div>
+
+            {% else %}
+
+                <div class="returned-box">
+
+                    <h2>
+                        ✓ Item devolvido
+                    </h2>
+
+                    <p>
+                        Este item foi marcado como devolvido.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 AÇÕES
+                 ================================================= -->
+
+            <div class="detail-actions">
+
+                <!-- EDITAR -->
+
+                <a
+                    href="{{ url_for(
+                        'edit_item',
+                        item_id=item.id
+                    ) }}"
+                    class="btn btn-secondary"
+                >
+                    ✎ Editar
+                </a>
+
+
+                <!-- DEVOLVER / REABRIR -->
+
+                {% if item.status != "devolvido" %}
+
+                    <form
+                        action="{{ url_for(
+                            'mark_as_returned',
+                            item_id=item.id
+                        ) }}"
+                        method="POST"
+                        onsubmit="return confirm(
+                            'Tem certeza que deseja marcar este item como devolvido?'
+                        );"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-success"
+                        >
+                            ✓ Marcar como devolvido
+                        </button>
+
+                    </form>
+
+                {% else %}
+
+                    <form
+                        action="{{ url_for(
+                            'reopen_item',
+                            item_id=item.id
+                        ) }}"
+                        method="POST"
+                        onsubmit="return confirm(
+                            'Deseja reabrir este item?'
+                        );"
+                    >
+
+                        <button
+                            type="submit"
+                            class="btn btn-secondary"
+                        >
+                            ↻ Reabrir item
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+
+                <!-- EXCLUIR -->
+
+                <form
+                    action="{{ url_for(
+                        'delete_item',
+                        item_id=item.id
+                    ) }}"
+                    method="POST"
+                    onsubmit="return confirm(
+                        'Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.'
+                    );"
+                >
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                    >
+                        🗑 Excluir
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
